@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const User = require("../model/user"); // Agar user model alag hai, ya fir niche User schema bana sakte hain
+const User = require("../model/User"); // Agar user model alag hai, ya fir niche User schema bana sakte hain
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
