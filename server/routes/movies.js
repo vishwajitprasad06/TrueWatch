@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Movie = require("../model/movie"); // Aapke model ka path
+const Movie = require("../model/Movie"); // Aapke model ka path
 
 // 1. GET ALL MOVIES & AUDIO SERIES
 router.get("/", async (req, res) => {
