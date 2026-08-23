@@ -13,7 +13,7 @@ import PremiumStore from "./pages/PremiumStore";
 import WatchHistory from "./pages/WatchHistory";
 import Downloads from "./pages/Downloads";
 import { NotificationProvider } from "./components/NotificationManager";
-import Auth from "./pages/Auth";
+import AuthPage from "./pages/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute"; // <-- ProtectedRoute import kiya gaya hai
 
 import "./App.css";
@@ -34,7 +34,7 @@ function App() {
           <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/search" element={<Search />} />
           <Route path="/page/:slug" element={<CustomPage />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={<AuthPage />} />
 
           {/* Protected Routes (Sirf logged-in users ke liye) */}
           <Route 
