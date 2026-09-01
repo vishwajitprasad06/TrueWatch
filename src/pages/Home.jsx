@@ -28,15 +28,17 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/movies")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.length > 0) {
-          setAllMovies([...data, ...staticMovies]);
-        }
-      })
-      .catch((err) => console.log("Backend offline, using static data:", err));
-  }, []);
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+      fetch(`${API_URL}/api/movies`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.length > 0) {
+            setAllMovies([...data, ...staticMovies]);
+          }
+        })
+        .catch((err) => console.log("Backend offline, using static data:", err));
+    }, []);
 
   const localMovies = JSON.parse(localStorage.getItem("customMovies")) || [];
 

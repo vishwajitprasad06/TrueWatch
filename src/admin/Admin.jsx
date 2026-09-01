@@ -36,10 +36,14 @@ function Admin() {
   const [pageTitle, setPageTitle] = useState("");
   const [pageSlug, setPageSlug] = useState("");
   const [pageContent, setPageContent] = useState("");
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Backend se movies fetch karna
-  useEffect(() => {
-    fetch("http://localhost:5000/api/movies")
+          // Backend se movies fetch karna
+          useEffect(() => {
+            // Purana: fetch("http://localhost:5000/api/movies")
+        // Naya:
+        fetch(`${API_URL}/api/movies`)
+
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) {
@@ -89,7 +93,7 @@ function Admin() {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/movies/create", {
+      const response = await fetch(`${API_URL}/api/movies/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMovie),
@@ -134,7 +138,7 @@ function Admin() {
     // Agar movie MongoDB database ki hai (_id hai)
     if (targetMovie._id) {
       try {
-        const response = await fetch(`http://localhost:5000/api/movies/${targetMovie._id}/banner`, {
+       const response = await fetch(`${API_URL}/api/movies/${targetMovie._id}/banner`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
         });
@@ -184,7 +188,7 @@ function Admin() {
 
     if (targetMovie && targetMovie._id) {
       try {
-        const response = await fetch(`http://localhost:5000/api/movies/${targetMovie._id}/episode`, {
+        const response = await fetch(`${API_URL}/api/movies/${targetMovie._id}/episode`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: newEpUrl.trim() }),
