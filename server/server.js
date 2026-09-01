@@ -14,7 +14,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/auth"); 
 const movieRoutes = require("./routes/movies"); 
 const reviewRoutes = require("./routes/reviews");
-const Movie = require("./models/Movie"); // Movie model import kiya hai taaki database mein save ho sake
+const Movie = require("./model/Movie"); // Movie model import kiya hai taaki database mein save ho sake
 
 const app = express();
 app.use(express.json());
