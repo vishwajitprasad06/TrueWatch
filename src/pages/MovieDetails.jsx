@@ -14,7 +14,6 @@ function MovieDetails() {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [selectedAudioLang, setSelectedAudioLang] = useState("Hindi");
 
-  // Backend se movies fetch karke current movie ko find karna
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -25,9 +24,8 @@ function MovieDetails() {
         const localMovies = JSON.parse(localStorage.getItem("customMovies")) || [];
         const allMovies = [...(Array.isArray(dbMovies) ? dbMovies : []), ...localMovies, ...staticMovies];
 
-        // MongoDB ka _id ya local/static ka id match karna
         const foundMovie = allMovies.find(
-          (item) => String(item._id) === String(id) || Number(item.id) === Number(id)
+          (item) => String(item._id) === String(id) || String(item.id) === String(id)
         );
 
         if (foundMovie) {
@@ -37,10 +35,10 @@ function MovieDetails() {
           }
         }
       } catch (err) {
-        console.log("Error fetching movie details from backend, checking local/static:", err);
+        console.log("Error fetching movie details from backend:", err);
         const localMovies = JSON.parse(localStorage.getItem("customMovies")) || [];
         const allMovies = [...localMovies, ...staticMovies];
-        const foundMovie = allMovies.find((item) => Number(item.id) === Number(id) || String(item._id) === String(id));
+        const foundMovie = allMovies.find((item) => String(item._id) === String(id) || String(item.id) === String(id));
         if (foundMovie) setMovie(foundMovie);
       } finally {
         setLoading(false);
@@ -50,12 +48,11 @@ function MovieDetails() {
     fetchMovieDetails();
   }, [id]);
 
-  // Watchlist check
   useEffect(() => {
     if (movie) {
       const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
       const movieId = movie._id || movie.id;
-      const isExist = watchlist.some((item) => (item._id || item.id) === movieId);
+      const isExist = watchlist.some((item) => String(item._id || item.id) === String(movieId));
       setIsInWatchlist(isExist);
     }
   }, [movie]);
@@ -65,7 +62,7 @@ function MovieDetails() {
     const movieId = movie._id || movie.id;
     
     if (isInWatchlist) {
-      watchlist = watchlist.filter((item) => (item._id || item.id) !== movieId);
+      watchlist = watchlist.filter((item) => String(item._id || item.id) !== String(movieId));
       setIsInWatchlist(false);
       alert("Removed from Watchlist");
     } else {
@@ -186,7 +183,6 @@ function MovieDetails() {
           </div>
         </div>
 
-        {/* Episodes List */}
         {isSeriesOrAudio && (
           <section style={{ maxWidth: "900px", margin: "30px auto 0 auto", padding: "0 5%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "15px" }}>

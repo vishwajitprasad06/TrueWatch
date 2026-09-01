@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import { movies as staticMovies } from "../data/movies";
-import PlaybackSpeedControl from "../components/PlaybackSpeedControl"; // 1. Speed Controller Import kiya
+import PlaybackSpeedControl from "../components/PlaybackSpeedControl";
 
 function Watch() {
   const { id } = useParams();
@@ -19,7 +19,6 @@ function Watch() {
   const [selectedAudio, setSelectedAudio] = useState(paramAudio || "Hindi");
   const [selectedSub, setSelectedSub] = useState("Off");
 
-  // 2. Backend Database se movie / audio series fetch karna
   useEffect(() => {
     const fetchWatchMovie = async () => {
       try {
@@ -30,9 +29,8 @@ function Watch() {
         const localMovies = JSON.parse(localStorage.getItem("customMovies")) || [];
         const allMovies = [...(Array.isArray(dbMovies) ? dbMovies : []), ...localMovies, ...staticMovies];
 
-        // MongoDB _id ya static id match karna
         const found = allMovies.find(
-          (item) => String(item._id) === String(id) || Number(item.id) === Number(id)
+          (item) => String(item._id) === String(id) || String(item.id) === String(id)
         );
 
         if (found) {
@@ -45,7 +43,7 @@ function Watch() {
         console.log("Backend offline, checking local & static:", err);
         const localMovies = JSON.parse(localStorage.getItem("customMovies")) || [];
         const allMovies = [...localMovies, ...staticMovies];
-        const found = allMovies.find((item) => Number(item.id) === Number(id) || String(item._id) === String(id));
+        const found = allMovies.find((item) => String(item._id) === String(id) || String(item.id) === String(id));
         if (found) setMovie(found);
       } finally {
         setLoading(false);
@@ -55,7 +53,6 @@ function Watch() {
     fetchWatchMovie();
   }, [id, paramAudio]);
 
-  // Watch History & Continue Watching Progress Logic
   useEffect(() => {
     if (id) {
       let history = JSON.parse(localStorage.getItem("watchHistory")) || [];
@@ -65,7 +62,6 @@ function Watch() {
     }
   }, [id]);
 
-  // Saved Time Load karein
   const handleLoadedMetadata = () => {
     const savedTime = localStorage.getItem(`progress_${id}_ep_${currentEpIndex}`);
     if (savedTime && videoRef.current) {
@@ -73,7 +69,6 @@ function Watch() {
     }
   };
 
-  // Video time update par progress save karein
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       localStorage.setItem(`progress_${id}_ep_${currentEpIndex}`, videoRef.current.currentTime);
@@ -86,16 +81,14 @@ function Watch() {
 
   if (!movie) return <div className="page"><BackButton /><h2>Video not found</h2></div>;
 
-  // Agar movie ke paas episodes array hai toh woh play hoga, warna main videoUrl
   const activeVideoUrl = movie.episodes && movie.episodes.length > 0 
     ? movie.episodes[currentEpIndex]?.url 
-    : movie.videoUrl;
+    : (movie.videoUrl || "https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1192-large.mp4");
 
   return (
     <main className="watch-page" style={{ background: "black", minHeight: "100vh" }}>
       <BackButton />
 
-      {/* Video Player Container */}
       <div className="video-container">
         {activeVideoUrl ? (
           <video 
@@ -119,7 +112,6 @@ function Watch() {
         )}
       </div>
 
-      {/* Episodes Selector Bar (Agar episodes available hain) */}
       {movie.episodes && movie.episodes.length > 0 && (
         <div style={{ background: "#151515", padding: "15px 5%", borderBottom: "1px solid #222", display: "flex", alignItems: "center", gap: "15px", overflowX: "auto" }}>
           <span style={{ color: "#aaa", fontSize: "14px", fontWeight: "bold", whiteSpace: "nowrap" }}>Episodes:</span>
@@ -147,9 +139,7 @@ function Watch() {
         </div>
       )}
 
-      {/* Audio, Resolution, Subtitles & Playback Speed Controls */}
       <div className="player-controls" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 5%", background: "#111", flexWrap: "wrap", gap: "15px" }}>
-        
         <div>
           <h3 style={{ color: "white", fontSize: "18px", margin: 0 }}>
             {movie.title} {movie.episodes && movie.episodes.length > 0 && `- Ep ${movie.episodes[currentEpIndex]?.epNum || currentEpIndex + 1}`}
@@ -158,14 +148,11 @@ function Watch() {
         </div>
 
         <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", alignItems: "center" }}>
-          
-          {/* Playback Speed Controller Component Integration */}
           <div>
             <label style={{ color: "#aaa", fontSize: "12px", display: "block", marginBottom: "4px" }}>Speed</label>
             <PlaybackSpeedControl videoRef={videoRef} />
           </div>
 
-          {/* Resolution Selector */}
           <div>
             <label style={{ color: "#aaa", fontSize: "12px", display: "block", marginBottom: "4px" }}>Quality</label>
             <select value={selectedQuality} onChange={(e) => setSelectedQuality(e.target.value)} style={selectStyle}>
@@ -175,7 +162,6 @@ function Watch() {
             </select>
           </div>
 
-          {/* Audio Language Selector */}
           <div>
             <label style={{ color: "#aaa", fontSize: "12px", display: "block", marginBottom: "4px" }}>Audio Language</label>
             <select value={selectedAudio} onChange={(e) => setSelectedAudio(e.target.value)} style={selectStyle}>
@@ -188,7 +174,6 @@ function Watch() {
             </select>
           </div>
 
-          {/* Subtitles Selector */}
           <div>
             <label style={{ color: "#aaa", fontSize: "12px", display: "block", marginBottom: "4px" }}>Subtitles</label>
             <select value={selectedSub} onChange={(e) => setSelectedSub(e.target.value)} style={selectStyle}>
@@ -197,9 +182,7 @@ function Watch() {
               <option value="English">English</option>
             </select>
           </div>
-
         </div>
-
       </div>
     </main>
   );
