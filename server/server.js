@@ -1,19 +1,18 @@
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-const express = Multiple = require("express"); // wait, clean express require below
+const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-const expressApp = require("express");
 const authRoutes = require("./routes/auth"); 
 const movieRoutes = require("./routes/movies"); 
 const reviewRoutes = require("./routes/reviews");
 const Movie = require("./model/Movie");
 
-const app = expressApp();
-app.use(expressApp.json());
+const app = express();
+app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 5000;
@@ -84,6 +83,41 @@ const syncAllApisOnStartup = async () => {
     console.log("Jikan sync skipped due to timeout/rate limit:", err.message);
   }
 
+  // 3. TMDB API Sync (Movies & TV Shows)
+  try {
+    const TMDB_API_KEY = process.env.TMDB_API_KEY || "";
+    if (TMDB_API_KEY) {
+      const tmdbRes = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}`);
+      if (tmdbRes.ok) {
+        const tmdbData = await tmdbRes.json();
+        if (tmdbData && tmdbData.results) {
+          for (let item of tmdbData.results) {
+            const movieContent = {
+              title: item.title || item.name || "Unknown Title",
+              category: item.media_type === "tv" ? "TV" : "Movies",
+              language: item.original_language ? item.original_language.toUpperCase() : "English",
+              genre: "Action, Drama, Thriller",
+              year: item.release_date ? new Date(item.release_date).getFullYear() : (item.first_air_date ? new Date(item.first_air_date).getFullYear() : 2026),
+              rating: item.vote_average ? item.vote_average.toFixed(1) : 8.0,
+              duration: "120m",
+              poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "",
+              description: item.overview || "No description available.",
+              videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1192-large.mp4",
+              isVisible: true,
+              isHeroBanner: false
+            };
+            await Movie.findOneAndUpdate({ title: movieContent.title }, movieContent, { upsert: true, new: true });
+          }
+          console.log("TMDB Movies & TV Shows synced successfully! 🎬");
+        }
+      }
+    } else {
+      console.log("TMDB_API_KEY not found in environment variables, skipping TMDB sync.");
+    }
+  } catch (err) {
+    console.log("TMDB sync skipped:", err.message);
+  }
+
   console.log("All available API startup sync processes finished! 🚀");
 };
 
@@ -91,7 +125,7 @@ const syncAllApisOnStartup = async () => {
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected Successfully to TrueWatch Database 🚀");
-    syncAllApisOnStartup(); // Server start hote hi multiple APIs fetch hongi
+    syncAllApisOnStartup(); 
   })
   .catch((err) => console.log("Database connection error: ", err));
 
